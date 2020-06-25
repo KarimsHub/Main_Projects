@@ -7,6 +7,10 @@ import random
 
 delay = 0.1
 
+# Score
+score = 0
+high_score = 0
+
 # set up the screen
 window = turtle.Screen()
 window.title('Snake Game by Karim')
@@ -33,7 +37,15 @@ food.goto(0,100) #food starts at another position than head
 
 segments = []
 
-
+# Pen
+pen = turtle.Turtle()
+pen.speed(0)
+pen.shape('square')
+pen.color('black')
+pen.penup()
+pen.hideturtle()
+pen.goto(0, 260)
+pen.write('Score: 0  High Score: 0', align = 'center', font = ('Arial', 24, 'normal'))
 
 # functions
 
@@ -98,6 +110,13 @@ while True:
         # clear the segments list
         segments.clear()
 
+        # Reset score if it colide with the border
+        score = 0
+
+        # Update the score board
+        pen.clear()
+        pen.write('Score: {}  High Score: {}'.format(score, high_score), align = 'center', font = ('Arial', 24, 'normal'))
+
     if head.distance(food) < 20: #build in function to measure the distance between head and food to check for a collision
         #move the food to random spot
         x = random.randint(-290, 290)
@@ -112,6 +131,15 @@ while True:
         new_segment.color('grey')
         new_segment.penup()
         segments.append(new_segment)
+
+        # Increase the score
+        score += 10
+
+        if score > high_score:
+            high_score = score
+        
+        pen.clear()
+        pen.write('Score: {}  High Score: {}'.format(score, high_score), align = 'center', font = ('Arial', 24, 'normal'))
 
     # move the end segements first
     for index in range(len(segments)-1, 0, -1): # for example if list contains 10 it decimate by 1 and goes up to 0 (but 0 is +1 so we have to decimate by 1 again)
@@ -139,6 +167,13 @@ while True:
     
             # clear the segments list
             segments.clear()
+
+            # Reset score if it colide with the body
+            score = 0
+            
+            # Update the score board
+            pen.clear()
+            pen.write('Score: {}  High Score: {}'.format(score, high_score), align = 'center', font = ('Arial', 24, 'normal'))
 
     time.sleep(delay) #suspend execution of the program by the given number of seconds
 
