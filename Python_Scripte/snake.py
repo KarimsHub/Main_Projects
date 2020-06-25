@@ -1,4 +1,4 @@
-# Simple Snake Game
+# Simple Snake Game with Turtle
 
 import turtle
 import time
