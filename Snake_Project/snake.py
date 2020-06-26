@@ -6,6 +6,7 @@ import time
 import random
 
 delay = 0.1
+running = True # created the variable for main loop which can be changed
 
 # Score
 score = 0
@@ -84,6 +85,9 @@ def move():
         x = head.xcor() # return the turtles x coordinate
         head.setx(x + 20) 
 
+def quit(): # sets the command when pressing q its changing from True to False
+    global running
+    running = False
 
 # Keyboard bindings
 window.listen() # set focus on turtlescreen in order to collect key events. Needed to to be able to register key-events
@@ -92,8 +96,10 @@ window.onkeypress(go_down, 's')
 window.onkeypress(go_left, 'a')
 window.onkeypress(go_right, 'd')
 
+window.onkeypress(quit, 'q')
+
 # Main game loop
-while True:
+while running:
     window.update() #Perform a turtlescreen update. used when tracer is turned off, like in our case
 
 
@@ -176,5 +182,3 @@ while True:
             pen.write('Score: {}  High Score: {}'.format(score, high_score), align = 'center', font = ('Arial', 24, 'normal'))
 
     time.sleep(delay) #suspend execution of the program by the given number of seconds
-
-window.mainloop()
