@@ -4,6 +4,7 @@
 import turtle
 import time
 import random
+import os
 
 delay = 0.1
 running = True # created the variable for main loop which can be changed
@@ -105,10 +106,11 @@ while running:
 
     # check for a collision with the border
     if head.xcor() > 290 or head.xcor() < -290 or head.ycor() > 290 or head.ycor() < -290:
+        os.system('afplay Failure_sound.mp3&')
         time.sleep(1)
         head.goto(0,0)
         head.direction = 'stop'
-
+        
         # hide the segments
         for segment in segments:
             segment.goto(1000, 1000) # moving the segments out of the screen
@@ -129,6 +131,8 @@ while running:
         y = random.randint(-290, 290)
 
         food.goto(x, y)
+        # implement music
+        os.system('afplay Score3.mp3&')
 
         #add a segment
         new_segment = turtle.Turtle()
