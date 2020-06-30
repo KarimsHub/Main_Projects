@@ -2,7 +2,7 @@
 
 import turtle
 import random
-import playsound
+import os
 
 score = 0
 lives = 3 
@@ -73,10 +73,15 @@ def go_left():
 def go_right():
     player.direction = 'right'
 
+def quit(): # sets the command when pressing q its changing from True to False
+    global running
+    running = False
+
 #Keyboard Bindings
 window.listen()
 window.onkeypress(go_left, 'Left') # using arrow keys
 window.onkeypress(go_right, 'Right') # using arrow keys
+window.onkeypress(quit, 'q')
 
 # Main game loop:
 while True:
@@ -108,7 +113,7 @@ while True:
 
         # Check for collision with the player
         if good_guy.distance(player) < 40:
-            playsound.playsound('Roaring.wav', False)
+            os.system('afplay Score3.mp3&')
             x = random.randint(-380, 380)
             y = random.randint(300, 400)
             good_guy.goto(x, y)
