@@ -5,7 +5,9 @@ import random
 import os
 
 score = 0
-lives = 3 
+lives = 3
+paused = False
+running = True
 
 window = turtle.Screen() # creating Screen
 window.title('Falling Skies') # creating title
@@ -77,70 +79,81 @@ def quit(): # sets the command when pressing q its changing from True to False
     global running
     running = False
 
+def toggle_pause(): # sets the command when pressing p its changing from False to True
+    global paused
+    if paused == True:
+        paused = False
+    else:
+        paused = True
+
 #Keyboard Bindings
 window.listen()
 window.onkeypress(go_left, 'Left') # using arrow keys
 window.onkeypress(go_right, 'Right') # using arrow keys
+
 window.onkeypress(quit, 'q')
 
+window.onkeypress(toggle_pause, 'p')
+
 # Main game loop:
-while True:
-    # Update screen
-    window.update()
-    # Move the player
-    if player.direction == 'left':
-        x = player.xcor() # find the current x coordinate of the player
-        x -= 3 # at the start the position of x = 0 and after subtracting its -3
-        player.setx(x) # we set the player to -3
+while running:
+    if not paused:
+        # Update screen
+        window.update()
+        # Move the player
+        if player.direction == 'left':
+            x = player.xcor() # find the current x coordinate of the player
+            x -= 3 # at the start the position of x = 0 and after subtracting its -3
+            player.setx(x) # we set the player to -3
 
-    if player.direction == 'right':
-        x = player.xcor() # find the current x coordinate of the player
-        x += 3 
-        player.setx(x)
-    
-    # Move the good guys
-    for good_guy in good_guys:
-        y = good_guy.ycor()
-        y -= good_guy.speed
-        good_guy.sety(y)
+        if player.direction == 'right':
+            x = player.xcor() # find the current x coordinate of the player
+            x += 3 
+            player.setx(x)
+        
+        # Move the good guys
+        for good_guy in good_guys:
+            y = good_guy.ycor()
+            y -= good_guy.speed
+            good_guy.sety(y)
 
-        # Check if off screen
-        if y < -300:
-            x = random.randint(-380, 380)
-            y = random.randint(300, 400)
-            good_guy.goto(x, y)
-
-
-        # Check for collision with the player
-        if good_guy.distance(player) < 40:
-            os.system('afplay Score3.mp3&')
-            x = random.randint(-380, 380)
-            y = random.randint(300, 400)
-            good_guy.goto(x, y)
-            score += 1
-            pen.clear()
-            pen.write('Score: {} Lives: {}'.format(score, lives), align='center', font=('courier', 24, 'normal')) 
-
-    # Move the bad guys
-    for bad_guy in bad_guys:
-        y = bad_guy.ycor()
-        y -= bad_guy.speed
-        bad_guy.sety(y)
-
-        # Check if off screen
-        if y < -300:
-            x = random.randint(-380, 380)
-            y = random.randint(300, 400)
-            bad_guy.goto(x, y)
+            # Check if off screen
+            if y < -300:
+                x = random.randint(-380, 380)
+                y = random.randint(300, 400)
+                good_guy.goto(x, y)
 
 
-        # Check for collision with the player
-        if bad_guy.distance(player) < 40:
-            x = random.randint(-380, 380)
-            y = random.randint(300, 400)
-            bad_guy.goto(x, y)            
-            lives -= 1
-            pen.clear()
-            pen.write('Score: {} Lives: {}'.format(score, lives), align='center', font=('courier', 24, 'normal')) 
+            # Check for collision with the player
+            if good_guy.distance(player) < 40:
+                os.system('afplay Score3.mp3&')
+                x = random.randint(-380, 380)
+                y = random.randint(300, 400)
+                good_guy.goto(x, y)
+                score += 1
+                pen.clear()
+                pen.write('Score: {} Lives: {}'.format(score, lives), align='center', font=('courier', 24, 'normal')) 
 
-window.mainloop()
+        # Move the bad guys
+        for bad_guy in bad_guys:
+            y = bad_guy.ycor()
+            y -= bad_guy.speed
+            bad_guy.sety(y)
+
+            # Check if off screen
+            if y < -300:
+                x = random.randint(-380, 380)
+                y = random.randint(300, 400)
+                bad_guy.goto(x, y)
+
+
+            # Check for collision with the player
+            if bad_guy.distance(player) < 40:
+                x = random.randint(-380, 380)
+                y = random.randint(300, 400)
+                bad_guy.goto(x, y)            
+                lives -= 1
+                pen.clear()
+                pen.write('Score: {} Lives: {}'.format(score, lives), align='center', font=('courier', 24, 'normal'))
+    else:
+        window.update()
