@@ -33,6 +33,8 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.da = 0
         self.thrust = 0.0
         self.acceleration = 0.02
+        self.health = 100
+        self.max_health = 100
 
     
     def update(self):
@@ -43,7 +45,8 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.dy += math.sin(math.radians(self.heading)) * self.thrust
     
         self.x += self.dx
-        self.y += self.dy 
+        self.y += self.dy
+
 
     def render(self, pen):
         pen.goto(self.x, self.y)
@@ -51,6 +54,28 @@ class Sprite(): # the class for objects like player, enemy etc.
         pen.shape(self.shape)
         pen.color(self.color)
         pen.stamp() # puts the pen on the screen
+
+        self.render_health_meter(pen)
+
+    
+    def render_health_meter(self, pen):
+        # Draw health
+        pen.goto(self.x -10, self.y + 20)
+        pen.width(3)
+        pen.pendown()
+        pen.setheading(0)
+
+        if self.health/self.max_health < 0.3:
+            pen.color('red') # if the health reaches under 30% the pen color changes to red
+        elif self.health/self.max_health < 0.7:
+            pen.color('yellow')
+        else:
+            pen.color('green')
+        
+        pen.fd(20 * (self.health/self.max_health))
+        pen.color('grey')
+        pen.fd(20 * ((self.max_health - self.health)/self.max_health))
+        pen.penup()
 
 class Player(Sprite): # inherets the attributes from the parent class
     def __init__(self, x, y, shape, color):
@@ -84,6 +109,8 @@ class Player(Sprite): # inherets the attributes from the parent class
         pen.stamp() # puts the pen on the screen
 
         pen.shapesize(1.0, 1.0, None)
+
+        self.render_health_meter(pen)
 
 
 # Creating the player sprite as a spaceship
