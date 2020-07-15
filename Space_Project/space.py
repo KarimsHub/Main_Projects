@@ -1,6 +1,7 @@
 
 
 import turtle
+import math
 
 
 SCREEN_WIDTH = 800
@@ -30,12 +31,20 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.dy = 0 # vertical speed (if dy is positiv the object moves up, if negative down)
         self.heading = 0
         self.da = 0
+        self.thrust = 0.0
+        self.acceleration = 0.02
+
     
     def update(self):
-        self.x += self.dx
-        self.y += self.dy
         self.heading += self.da # the heading is gonna change by the delta of the angle
+        self.heading %= 360
+
+        self.dx += math.cos(math.radians(self.heading)) * self.thrust
+        self.dy += math.sin(math.radians(self.heading)) * self.thrust
     
+        self.x += self.dx
+        self.y += self.dy 
+
     def render(self, pen):
         pen.goto(self.x, self.y)
         pen.setheading(self.heading) # sets the orientation of the turle to east
@@ -60,13 +69,25 @@ class Player(Sprite): # inherets the attributes from the parent class
     def stop_rotation(self):
         self.da = 0
     
+    def accelerate(self):
+        self.thrust += self.acceleration
+    
+    def deaccelerate(self):
+        self.thrust = 0.0
+    
+    def render(self, pen):
+        pen.shapesize(0.5, 1.0, None)
+        pen.goto(self.x, self.y)
+        pen.setheading(self.heading) # sets the orientation of the turle to east
+        pen.shape(self.shape)
+        pen.color(self.color)
+        pen.stamp() # puts the pen on the screen
 
+        pen.shapesize(1.0, 1.0, None)
 
 
 # Creating the player sprite as a spaceship
 player = Player(0,0, 'triangle', 'white') # putting the player in the center
-player.dx = 1
-player.dy = 0.5
 
 enemy = Sprite(0,100, 'square', 'red')
 enemy.dx = -1
@@ -90,6 +111,8 @@ window.onkeypress(player.rotate_right, 'Right')
 window.onkeyrelease(player.stop_rotation, 'Left') # the moment you dont press left or right it will stop rotating!
 window.onkeyrelease(player.stop_rotation, 'Right')
 
+window.onkeypress(player.accelerate, 'Up')
+window.onkeyrelease(player.deaccelerate, 'Up')
 # Main Loop
 while True:
     # Clear the screen
