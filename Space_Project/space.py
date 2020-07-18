@@ -20,6 +20,29 @@ pen.color('white')
 pen.penup()
 pen.hideturtle() # we won't see the drawed lines 
 
+class Game():
+    def __init__(self, width, height):
+        self.width = width
+        self.height = height
+
+    def render_border(self):
+        pen.color('white')
+        pen.width(3)
+        pen.penup()
+
+        left = -self.width / 2 # if the screen width is 800 like in  our case its -400 left and 400 by the right side
+        right = self.width / 2
+        top = self.height / 2
+        bottom = -self.height / 2
+
+        pen.goto(left, top) # starting left top
+        pen.pendown() # function needed so we can actually draw the border
+        pen.goto(right, top)
+        pen.goto(right, bottom)
+        pen.goto(left, bottom)
+        pen.goto(left, top)
+        pen.penup()
+
 class Sprite(): # the class for objects like player, enemy etc.
     # the constructor
     def __init__(self, x, y, shape, color):
@@ -47,6 +70,25 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.x += self.dx
         self.y += self.dy
 
+        self.border_check()
+    
+    def border_check(self):
+        if self.x > game.width / 2 - 10:
+            self.x = game.width /2 - 10
+            self.dx *= -1 # the sprite bounces off the right wall
+        
+        elif self.x < -game.width / 2 + 10:
+            self.x = -game.width /2 + 10
+            self.dx *= -1 # the sprite bounces off the left wall       
+
+        if self.y > game.height / 2 - 10:
+            self.y = game.height /2 - 10
+            self.dy *= -1 # the sprite bounces off the top wall
+        
+        elif self.y < -game.height / 2 + 10:
+            self.y = -game.height /2 + 10
+            self.dy *= -1 # the sprite bounces off the bottom wall       
+
 
     def render(self, pen):
         pen.goto(self.x, self.y)
@@ -73,8 +115,11 @@ class Sprite(): # the class for objects like player, enemy etc.
             pen.color('green')
         
         pen.fd(20 * (self.health/self.max_health))
-        pen.color('grey')
-        pen.fd(20 * ((self.max_health - self.health)/self.max_health))
+
+        if self.health != self.max_health: # if function neccessary to get rid of the grey dots at the start
+            pen.color('grey')
+            pen.fd(20 * ((self.max_health - self.health)/self.max_health))
+        
         pen.penup()
 
 class Player(Sprite): # inherets the attributes from the parent class
@@ -112,6 +157,8 @@ class Player(Sprite): # inherets the attributes from the parent class
 
         self.render_health_meter(pen)
 
+# Create the border
+game = Game(1000, 300)
 
 # Creating the player sprite as a spaceship
 player = Player(0,0, 'triangle', 'white') # putting the player in the center
@@ -153,6 +200,9 @@ while True:
     # Render the Sprites
     for sprite in sprites:
         sprite.render(pen)
+
+    # Render the borders
+    game.render_border()
 
     # Update the Screen
     window.update()
