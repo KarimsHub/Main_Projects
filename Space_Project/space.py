@@ -129,7 +129,7 @@ class Player(Sprite): # inherets the attributes from the parent class
         self.score = 0
         self.heading = 90 #player goes up
         self.da = 0 # changing the angle
-    
+
     def rotate_left(self):
         self.da = 5
 
@@ -145,6 +145,9 @@ class Player(Sprite): # inherets the attributes from the parent class
     def deaccelerate(self):
         self.thrust = 0.0
     
+    def fire(self):
+        missile.fire(self.x, self.y, self.heading, self.dx, self.dy) # missile starting on the same position as the player sprites
+    
     def render(self, pen):
         pen.shapesize(0.5, 1.0, None)
         pen.goto(self.x, self.y)
@@ -157,11 +160,64 @@ class Player(Sprite): # inherets the attributes from the parent class
 
         self.render_health_meter(pen)
 
+class Missile(Sprite): # inherets the attributes from the parent class
+    def __init__(self, x, y, shape, color):
+        Sprite.__init__(self, x, y, shape, color)
+        self.state = 'ready'
+        self.thrust = 8.0
+        self.max_fuel = 200
+        self.fuel = self.max_fuel
+
+    def fire(self, x, y, heading, dx, dy):
+        self.state = 'active'
+        self.x = x
+        self.y = y
+        self.heading = heading
+        self.dx = dx
+        self.dy = dy
+
+        self.dx += math.cos(math.radians(self.heading)) * self.thrust # taking the current dx (which is from playwer) and adds own thrust
+        self.dy += math.sin(math.radians(self.heading)) * self.thrust
+
+    def update(self):
+       if self.state == 'active':
+           self.fuel -= self.thrust
+           if self.fuel <= 0:
+               self.reset()
+           self.heading += self.da # the heading is gonna change by the delta of the angle
+           self.heading %= 360
+           
+           self.x += self.dx
+           self.y += self.dy
+           
+           self.border_check()
+    
+    def reset(self): # once its resets we set the fuel back to max fuel and state to ready
+        self.fuel = self.max_fuel
+        self.dx = 0
+        self.dy = 0
+        self.state = 'ready'
+
+
+    def render(self, pen): # only renders if its active
+        if self.state == 'active':
+            pen.shapesize(0.2, 0.2, None)
+            pen.goto(self.x, self.y)
+            pen.setheading(self.heading) # sets the orientation of the turle to east
+            pen.shape(self.shape)
+            pen.color(self.color)
+            pen.stamp() # puts the pen on the screen
+    
+            pen.shapesize(1.0, 1.0, None)
+
 # Create the border
 game = Game(1000, 300)
 
 # Creating the player sprite as a spaceship
 player = Player(0,0, 'triangle', 'white') # putting the player in the center
+
+# Creating missile object
+missile = Missile(0, 100, 'circle', 'yellow')
 
 enemy = Sprite(0,100, 'square', 'red')
 enemy.dx = -1
@@ -176,6 +232,7 @@ sprites = []
 sprites.append(player)
 sprites.append(enemy)
 sprites.append(powerup)
+sprites.append(missile)
 
 # Keyboard bindings
 window.listen()
@@ -187,6 +244,9 @@ window.onkeyrelease(player.stop_rotation, 'Right')
 
 window.onkeypress(player.accelerate, 'Up')
 window.onkeyrelease(player.deaccelerate, 'Up')
+
+window.onkeypress(player.fire, 'space')
+
 # Main Loop
 while True:
     # Clear the screen
