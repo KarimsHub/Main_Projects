@@ -58,6 +58,18 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.acceleration = 0.02
         self.health = 100
         self.max_health = 100
+        self.width = 20
+        self.height = 20
+
+
+    def is_collision(self, other):
+        if self.x < other.x + other.width and\
+            self.x + self.width > other.x and\
+            self.y < other.y + other.height and\
+            self.y + self.height > other.y:
+            return True
+        else:
+            return False
 
     
     def update(self):
@@ -167,17 +179,20 @@ class Missile(Sprite): # inherets the attributes from the parent class
         self.thrust = 8.0
         self.max_fuel = 200
         self.fuel = self.max_fuel
+        self.height = 4
+        self.width = 4
 
     def fire(self, x, y, heading, dx, dy):
-        self.state = 'active'
-        self.x = x
-        self.y = y
-        self.heading = heading
-        self.dx = dx
-        self.dy = dy
+        if self.state == 'ready':
+            self.state = 'active'
+            self.x = x
+            self.y = y
+            self.heading = heading
+            self.dx = dx
+            self.dy = dy
 
-        self.dx += math.cos(math.radians(self.heading)) * self.thrust # taking the current dx (which is from playwer) and adds own thrust
-        self.dy += math.sin(math.radians(self.heading)) * self.thrust
+            self.dx += math.cos(math.radians(self.heading)) * self.thrust # taking the current dx (which is from playwer) and adds own thrust
+            self.dy += math.sin(math.radians(self.heading)) * self.thrust
 
     def update(self):
        if self.state == 'active':
@@ -210,8 +225,16 @@ class Missile(Sprite): # inherets the attributes from the parent class
     
             pen.shapesize(1.0, 1.0, None)
 
+class Enemy(Sprite): # inherets the attributes from the parent class
+    def __init__(self, x, y, shape, color):
+        Sprite.__init__(self, x, y, shape, color)
+
+class Powerup(Sprite): # inherets the attributes from the parent class
+    def __init__(self, x, y, shape, color):
+        Sprite.__init__(self, x, y, shape, color)
+
 # Create the border
-game = Game(1000, 300)
+game = Game(600, 400)
 
 # Creating the player sprite as a spaceship
 player = Player(0,0, 'triangle', 'white') # putting the player in the center
@@ -219,13 +242,21 @@ player = Player(0,0, 'triangle', 'white') # putting the player in the center
 # Creating missile object
 missile = Missile(0, 100, 'circle', 'yellow')
 
-enemy = Sprite(0,100, 'square', 'red')
+enemy = Enemy(0,100, 'square', 'red')
 enemy.dx = -1
 enemy.dy = -0.3
 
-powerup = Sprite(0,-100, 'circle', 'blue')
+enemy2 = Enemy(-100,100, 'square', 'red')
+enemy2.dx = 1
+enemy2.dy = 0.3
+
+powerup = Powerup(0,100, 'circle', 'blue')
 powerup.dy = 1
 powerup.dx = 0.1
+
+powerup2 = Powerup(-100,100, 'circle', 'blue')
+powerup2.dy = -1
+powerup2.dx = -0.1
 
 # Sprites list
 sprites = []
@@ -233,6 +264,8 @@ sprites.append(player)
 sprites.append(enemy)
 sprites.append(powerup)
 sprites.append(missile)
+sprites.append(enemy2)
+sprites.append(powerup2)
 
 # Keyboard bindings
 window.listen()
@@ -255,6 +288,28 @@ while True:
     # Update the Sprites to move around the screen
     for sprite in sprites:
         sprite.update()
+    
+    # check for collision
+    for sprite in sprites:
+        if isinstance(sprite, Enemy):
+            if player.is_collision(sprite):
+                player.x = 0
+                player.y = 0
+
+            if missile.state == 'active' and missile.is_collision(sprite):
+                sprite.x = -100
+                sprite.y = -100
+                missile.reset()
+        
+        if isinstance(sprite, Powerup):
+            if player.is_collision(sprite):
+                sprite.x = 100
+                sprite.y = 100
+
+            if missile.state == 'active' and missile.is_collision(sprite):
+                sprite.x = 100
+                sprite.y = -100
+                missile.reset()
 
 
     # Render the Sprites
