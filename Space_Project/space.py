@@ -2,6 +2,7 @@
 
 import turtle
 import math
+import random
 
 
 SCREEN_WIDTH = 800
@@ -24,6 +25,39 @@ class Game():
     def __init__(self, width, height):
         self.width = width
         self.height = height
+        self.level = 1
+    
+    def start_level(self):
+        sprites.clear() # clears all the sprites from the list
+
+        # add the player 
+        sprites.append(player)
+
+        # add missile
+        sprites.append(missile)
+
+        # add enemy per level
+        for _ in range(self.level):
+            x = random.randint(-self.width/2, self.width/2)
+            y = random.randint(-self.height/2, self.height/2)
+            dx = random.randint(-2, 2)
+            dy = random.randint(-2, -2)
+            sprites.append(Enemy(x, y, 'square', 'red'))
+            sprites[-1].dx = dx # will give us the the last sprite what was added
+            sprites[-1].dy = dy
+
+        # add powerup per level
+        for _ in range(self.level):
+            x = random.randint(-self.width/2, self.width/2)
+            y = random.randint(-self.height/2, self.height/2)
+            dx = random.randint(-2, 2)
+            dy = random.randint(-2, -2)
+            sprites.append(Powerup(x, y, 'circle', 'blue'))
+            sprites[-1].dx = dx # will give us the the last sprite what was added
+            sprites[-1].dy = dy
+
+
+
 
     def render_border(self):
         pen.color('white')
@@ -242,30 +276,33 @@ player = Player(0,0, 'triangle', 'white') # putting the player in the center
 # Creating missile object
 missile = Missile(0, 100, 'circle', 'yellow')
 
-enemy = Enemy(0,100, 'square', 'red')
-enemy.dx = -1
-enemy.dy = -0.3
+#enemy = Enemy(0,100, 'square', 'red')
+#enemy.dx = -1
+#enemy.dy = -0.3
+#
+#enemy2 = Enemy(-100,100, 'square', 'red')
+#enemy2.dx = 1
+#enemy2.dy = 0.3
 
-enemy2 = Enemy(-100,100, 'square', 'red')
-enemy2.dx = 1
-enemy2.dy = 0.3
-
-powerup = Powerup(0,100, 'circle', 'blue')
-powerup.dy = 1
-powerup.dx = 0.1
-
-powerup2 = Powerup(-100,100, 'circle', 'blue')
-powerup2.dy = -1
-powerup2.dx = -0.1
+#powerup = Powerup(0,100, 'circle', 'blue')
+#powerup.dy = 1
+#powerup.dx = 0.1
+#
+#powerup2 = Powerup(-100,100, 'circle', 'blue')
+#powerup2.dy = -1
+#powerup2.dx = -0.1
 
 # Sprites list
 sprites = []
-sprites.append(player)
-sprites.append(enemy)
-sprites.append(powerup)
-sprites.append(missile)
-sprites.append(enemy2)
-sprites.append(powerup2)
+#sprites.append(player)
+#sprites.append(enemy)
+#sprites.append(powerup)
+#sprites.append(missile)
+#sprites.append(enemy2)
+#sprites.append(powerup2)
+
+# setup the level
+game.start_level()
 
 # Keyboard bindings
 window.listen()
