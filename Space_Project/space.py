@@ -105,6 +105,16 @@ class Sprite(): # the class for objects like player, enemy etc.
             return True
         else:
             return False
+    
+    def bounce(self, other):
+        temp_dx = self.dx
+        temp_dy = self.dy
+
+        self.dx = other.dx
+        self.dy = other.dy
+
+        other.dx = temp_dx
+        other.dy = temp_dy
 
     
     def update(self):
@@ -196,6 +206,28 @@ class Player(Sprite): # inherets the attributes from the parent class
     def fire(self):
         missile.fire(self.x, self.y, self.heading, self.dx, self.dy) # missile starting on the same position as the player sprites
     
+    def update(self):
+        if self.state == 'active':
+            self.heading += self.da # the heading is gonna change by the delta of the angle
+            self.heading %= 360
+            self.dx += math.cos(math.radians(self.heading)) * self.thrust
+            self.dy += math.sin(math.radians(self.heading)) * self.thrust
+            self.x += self.dx
+            self.y += self.dy
+            self.border_check()
+            # Check health
+            if self.health <= 0:
+                self.reset()
+    
+    def reset(self): # resetting everything to the default numbers
+        self.x = 0
+        self.y = 0
+        self.health = self.max_health
+        self.heading = 90
+        self.dx = 0
+        self.dy = 0
+        self.lives -= 1
+
     def render(self, pen):
         pen.shapesize(0.5, 1.0, None)
         pen.goto(self.x, self.y)
@@ -354,8 +386,9 @@ while True:
     for sprite in sprites:
         if isinstance(sprite, Enemy) and sprite.state == 'active':
             if player.is_collision(sprite):
-                player.x = 0
-                player.y = 0
+                sprite.health -= 10
+                player.health -= 10
+                player.bounce(sprite)
 
             if missile.state == 'active' and missile.is_collision(sprite):
                 sprite.health -= 10
