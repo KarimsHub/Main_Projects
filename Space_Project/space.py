@@ -94,6 +94,7 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.max_health = 100
         self.width = 20
         self.height = 20
+        self.state = 'active'
 
 
     def is_collision(self, other):
@@ -137,13 +138,14 @@ class Sprite(): # the class for objects like player, enemy etc.
 
 
     def render(self, pen):
-        pen.goto(self.x, self.y)
-        pen.setheading(self.heading) # sets the orientation of the turle to east
-        pen.shape(self.shape)
-        pen.color(self.color)
-        pen.stamp() # puts the pen on the screen
+        if self.state == 'active':
+            pen.goto(self.x, self.y)
+            pen.setheading(self.heading) # sets the orientation of the turle to east
+            pen.shape(self.shape)
+            pen.color(self.color)
+            pen.stamp() # puts the pen on the screen
 
-        self.render_health_meter(pen)
+            self.render_health_meter(pen)
 
     
     def render_health_meter(self, pen):
@@ -262,6 +264,28 @@ class Missile(Sprite): # inherets the attributes from the parent class
 class Enemy(Sprite): # inherets the attributes from the parent class
     def __init__(self, x, y, shape, color):
         Sprite.__init__(self, x, y, shape, color)
+        self.max_health = 20
+        self.health = self.max_health
+
+    def update(self):
+        if self.state == 'active':
+            self.heading += self.da # the heading is gonna change by the delta of the angle
+            self.heading %= 360
+
+            self.dx += math.cos(math.radians(self.heading)) * self.thrust
+            self.dy += math.sin(math.radians(self.heading)) * self.thrust
+
+            self.x += self.dx
+            self.y += self.dy
+
+            self.border_check()
+
+            # Check health
+            if self.health <= 0:
+                self.reset()
+    
+    def reset(self):
+        self.state = 'inactive'
 
 class Powerup(Sprite): # inherets the attributes from the parent class
     def __init__(self, x, y, shape, color):
@@ -328,14 +352,13 @@ while True:
     
     # check for collision
     for sprite in sprites:
-        if isinstance(sprite, Enemy):
+        if isinstance(sprite, Enemy) and sprite.state == 'active':
             if player.is_collision(sprite):
                 player.x = 0
                 player.y = 0
 
             if missile.state == 'active' and missile.is_collision(sprite):
-                sprite.x = -100
-                sprite.y = -100
+                sprite.health -= 10
                 missile.reset()
         
         if isinstance(sprite, Powerup):
@@ -355,6 +378,17 @@ while True:
 
     # Render the borders
     game.render_border()
+
+    # Check for end of the level
+    end_of_level = True
+    for sprite in sprites:
+        # First look if an enemy sprite is still active
+        if isinstance(sprite, Enemy) and sprite.state == 'active':
+            end_of_level = False
+    
+    if end_of_level:
+        game.level += 1
+        game.start_level()
 
     # Update the Screen
     window.update()
