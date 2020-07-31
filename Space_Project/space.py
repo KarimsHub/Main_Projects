@@ -59,15 +59,15 @@ class Game():
 
 
 
-    def render_border(self):
+    def render_border(self, pen, x_offset, y_offset):
         pen.color('white')
         pen.width(3)
         pen.penup()
 
-        left = -self.width / 2 # if the screen width is 800 like in  our case its -400 left and 400 by the right side
-        right = self.width / 2
-        top = self.height / 2
-        bottom = -self.height / 2
+        left = -self.width / 2 - x_offset# if the screen width is 800 like in  our case its -400 left and 400 by the right side
+        right = self.width / 2 - x_offset
+        top = self.height / 2 - y_offset
+        bottom = -self.height / 2 - y_offset
 
         pen.goto(left, top) # starting left top
         pen.pendown() # function needed so we can actually draw the border
@@ -147,20 +147,20 @@ class Sprite(): # the class for objects like player, enemy etc.
             self.dy *= -1 # the sprite bounces off the bottom wall       
 
 
-    def render(self, pen):
+    def render(self, pen, x_offset, y_offset):
         if self.state == 'active':
-            pen.goto(self.x, self.y)
+            pen.goto(self.x - x_offset, self.y - y_offset)
             pen.setheading(self.heading) # sets the orientation of the turle to east
             pen.shape(self.shape)
             pen.color(self.color)
             pen.stamp() # puts the pen on the screen
 
-            self.render_health_meter(pen)
+            self.render_health_meter(pen, x_offset, y_offset)
 
     
-    def render_health_meter(self, pen):
+    def render_health_meter(self, pen, x_offset, y_offset):
         # Draw health
-        pen.goto(self.x -10, self.y + 20)
+        pen.goto(self.x - x_offset -10, self.y - y_offset + 20)
         pen.width(3)
         pen.pendown()
         pen.setheading(0)
@@ -228,9 +228,9 @@ class Player(Sprite): # inherets the attributes from the parent class
         self.dy = 0
         self.lives -= 1
 
-    def render(self, pen):
+    def render(self, pen, x_offset, y_offset):
         pen.shapesize(0.5, 1.0, None)
-        pen.goto(self.x, self.y)
+        pen.goto(self.x - x_offset, self.y - y_offset)
         pen.setheading(self.heading) # sets the orientation of the turle to east
         pen.shape(self.shape)
         pen.color(self.color)
@@ -238,7 +238,7 @@ class Player(Sprite): # inherets the attributes from the parent class
 
         pen.shapesize(1.0, 1.0, None)
 
-        self.render_health_meter(pen)
+        self.render_health_meter(pen, x_offset, y_offset)
 
 class Missile(Sprite): # inherets the attributes from the parent class
     def __init__(self, x, y, shape, color):
@@ -282,10 +282,10 @@ class Missile(Sprite): # inherets the attributes from the parent class
         self.state = 'ready'
 
 
-    def render(self, pen): # only renders if its active
+    def render(self, pen, x_offset, y_offset): # only renders if its active
         if self.state == 'active':
             pen.shapesize(0.2, 0.2, None)
-            pen.goto(self.x, self.y)
+            pen.goto(self.x - x_offset, self.y - y_offset)
             pen.setheading(self.heading) # sets the orientation of the turle to east
             pen.shape(self.shape)
             pen.color(self.color)
@@ -323,11 +323,23 @@ class Powerup(Sprite): # inherets the attributes from the parent class
     def __init__(self, x, y, shape, color):
         Sprite.__init__(self, x, y, shape, color)
 
+class Camera():
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+    
+    def update(self, x, y):
+        self.x = x
+        self.y = y
+
 # Create the border
 game = Game(600, 400)
 
 # Creating the player sprite as a spaceship
 player = Player(0,0, 'triangle', 'white') # putting the player in the center
+
+# Creating the Camera
+camera = Camera(player.x, player.y)
 
 # Creating missile object
 missile = Missile(0, 100, 'circle', 'yellow')
@@ -407,10 +419,10 @@ while True:
 
     # Render the Sprites
     for sprite in sprites:
-        sprite.render(pen)
+        sprite.render(pen, camera.x, camera.y)
 
     # Render the borders
-    game.render_border()
+    game.render_border(pen, camera.x, camera.y)
 
     # Check for end of the level
     end_of_level = True
@@ -422,6 +434,9 @@ while True:
     if end_of_level:
         game.level += 1
         game.start_level()
+    
+    # Updating the camera
+    camera.update(player.x, player.y)
 
     # Update the Screen
     window.update()
