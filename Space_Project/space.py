@@ -9,7 +9,7 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600 # setting up the size of the screen
 
 window = turtle.Screen() # creating the window
-window.setup(SCREEN_WIDTH, SCREEN_HEIGHT)
+window.setup(SCREEN_WIDTH + 220, SCREEN_HEIGHT + 20)
 window.title('Space Arena') # adding the title
 window.bgcolor('black') # adding the backgroundcolor
 window.tracer(0)
@@ -95,6 +95,7 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.width = 20
         self.height = 20
         self.state = 'active'
+        self.radar = 200
 
 
     def is_collision(self, other):
@@ -332,8 +333,44 @@ class Camera():
         self.x = x
         self.y = y
 
+class Radar():
+    def __init__(self, x, y, width, height):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+    
+    def render(self, pen, sprites):
+
+        # Draw radar circle
+        pen.setheading(90)
+        pen.goto(self.x + self.width / 2, self.y)
+        pen.pendown()
+        pen.circle(self.width / 2)
+        pen.penup()
+
+        # Draw the sprites
+        for sprite in sprites:
+            if sprite.state == 'active': # just want to use the active sprites
+                radar_x = self.x + (sprite.x - player.x) * (self.width / game.width)
+                radar_y = self.y + (sprite.y - player.y) * (self.height / game.height)
+                pen.goto(radar_x, radar_y)
+                pen.color(sprite.color) # getting the actual color of the sprite displayed on radar
+                pen.shape(sprite.shape)
+                pen.setheading(sprite.heading)
+                pen.shapesize(0.1, 0.1, None)
+
+                distance = ((player.x - sprite.x) ** 2 + (player.y - sprite.y) ** 2) ** 0.5
+                if distance < player.radar:
+                    pen.stamp() # stamps a copy of the turtle shape at the current turtle position
+                
+
+
 # Create the border
 game = Game(600, 400)
+
+# Create the radar
+radar = Radar(400, -200, 200, 200)
 
 # Creating the player sprite as a spaceship
 player = Player(0,0, 'triangle', 'white') # putting the player in the center
@@ -419,10 +456,10 @@ while True:
 
     # Render the Sprites
     for sprite in sprites:
-        sprite.render(pen, camera.x, camera.y)
+        sprite.render(pen, camera.x + 100, camera.y)
 
     # Render the borders
-    game.render_border(pen, camera.x, camera.y)
+    game.render_border(pen, camera.x + 100, camera.y)
 
     # Check for end of the level
     end_of_level = True
@@ -437,6 +474,9 @@ while True:
     
     # Updating the camera
     camera.update(player.x, player.y)
+
+    # Render the radar
+    radar.render(pen, sprites)
 
     # Update the Screen
     window.update()
