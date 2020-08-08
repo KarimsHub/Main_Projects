@@ -76,6 +76,107 @@ class Game():
         pen.goto(left, bottom)
         pen.goto(left, top)
         pen.penup()
+    
+    def render_info(self, pen, score, active_enemies = 0):
+        pen.color('#222255') # using html hex code
+        pen.penup()
+        pen.goto(400,0)
+        pen.shape('square')
+        pen.setheading(90)
+        pen.shapesize(10, 32, None)
+        pen.stamp()
+
+        pen.color('white')
+        pen.width(3)
+        pen.goto(300, 400)
+        pen.pendown()
+        pen.goto(300, -400)
+
+        pen.penup()
+        pen.color('white')
+        character_pen.scale = 1.0
+        character_pen.draw_string(pen, 'SPACE GAME', 400, 270)
+        character_pen.draw_string(pen, 'SCORE {}'.format(score), 400, 240)
+        character_pen.draw_string(pen, 'ENEMIES {}'.format(active_enemies), 400, 210)
+        character_pen.draw_string(pen, 'Lives {}'.format(player.lives), 400, 180)
+        character_pen.draw_string(pen, 'Level {}'.format(game.level), 400, 150)        
+
+class CharacterPen(): # defining all of the shapes
+    def __init__(self, color = 'white', scale = 1.0):
+        self.color = color
+        self.scale = scale
+
+        self.characters = {} # creating a dictionary
+        self.characters['1'] = ((-5, 10), (0, 10), (0, -10), (-5, -10), (5, -10)) # drawing these lines because of performance issues by rendering
+        self.characters["2"] = ((-5, 10),(5, 10),(5, 0), (-5, 0), (-5, -10), (5, -10))
+        self.characters["3"] = ((-5, 10),(5, 10),(5, 0), (0, 0), (5, 0), (5,-10), (-5, -10))
+        self.characters["4"] = ((-5, 10), (-5, 0), (5, 0), (2,0), (2, 5), (2, -10))
+        self.characters["5"] = ((5, 10), (-5, 10), (-5, 0), (5,0), (5,-10), (-5, -10))
+        self.characters["6"] = ((5, 10), (-5, 10), (-5, -10), (5, -10), (5, 0), (-5, 0))
+        self.characters["7"] = ((-5, 10), (5, 10), (0, -10))
+        self.characters["8"] = ((-5, 0), (5, 0), (5, 10), (-5, 10), (-5, -10), (5, -10), (5, 0))
+        self.characters["9"] = ((5, -10), (5, 10), (-5, 10), (-5, 0), (5, 0))
+        self.characters["0"] = ((-5, 10), (5, 10), (5, -10), (-5, -10), (-5, 10))
+
+        self.characters["A"] = ((-5, -10), (-5, 10), (5, 10), (5, -10), (5, 0), (-5, 0))
+        self.characters["B"] = ((-5, -10), (-5, 10), (3, 10), (3, 0), (-5, 0), (5,0), (5, -10), (-5, -10))
+        self.characters["C"] = ((5, 10), (-5, 10), (-5, -10), (5, -10))
+        self.characters["D"] = ((-5, 10), (-5, -10), (5, -8), (5, 8), (-5, 10))
+        self.characters["E"] = ((5, 10), (-5, 10), (-5, 0), (0, 0), (-5, 0), (-5, -10), (5, -10))
+        self.characters["F"] = ((5, 10), (-5, 10), (-5, 0), (5, 0), (-5, 0), (-5, -10))
+        self.characters["G"] = ((5, 10), (-5, 10), (-5, -10), (5, -10), (5, 0), (0, 0))
+        self.characters["H"] = ((-5, 10), (-5, -10), (-5, 0), (5, 0), (5, 10), (5, -10))
+        self.characters["I"] = ((-5, 10), (5, 10), (0, 10), (0, -10), (-5, -10), (5, -10))
+        self.characters["J"] = ((5, 10), (5, -10), (-5, -10), (-5, 0))   
+        self.characters["K"] = ((-5, 10), (-5, -10), (-5, 0), (5, 10), (-5, 0), (5, -10))
+        self.characters["L"] = ((-5, 10), (-5, -10), (5, -10))
+        self.characters["M"] = ((-5, -10), (-3, 10), (0, 0), (3, 10), (5, -10))
+        self.characters["N"] = ((-5, -10), (-5, 10), (5, -10), (5, 10))
+        self.characters["O"] = ((-5, 10), (5, 10), (5, -10), (-5, -10), (-5, 10))
+        self.characters["P"] = ((-5, -10), (-5, 10), (5, 10), (5, 0), (-5, 0))
+        self.characters["Q"] = ((5, -10), (-5, -10), (-5, 10), (5, 10), (5, -10), (2, -7), (6, -11))
+        self.characters["R"] = ((-5, -10), (-5, 10), (5, 10), (5, 0), (-5, 0), (5, -10))
+        self.characters["S"] = ((5, 8), (5, 10), (-5, 10), (-5, 0), (5, 0), (5, -10), (-5, -10), (-5, -8))
+        self.characters["T"] = ((-5, 10), (5, 10), (0, 10), (0, -10)) 
+        self.characters["V"] = ((-5, 10), (0, -10), (5, 10)) 
+        self.characters["U"] = ((-5, 10), (-5, -10), (5, -10), (5, 10)) 
+        self.characters["W"] = ((-5, 10), (-3, -10), (0, 0), (3, -10), (5, 10))   
+        self.characters["X"] = ((-5, 10), (5, -10), (0, 0), (-5, -10), (5, 10))   
+        self.characters["Y"] = ((-5, 10), (0, 0), (5, 10), (0,0), (0, -10))   
+        self.characters["Z"] = ((-5, 10), (5, 10), (-5, -10), (5, -10))   
+        
+        self.characters["-"] = ((-3, 0), (3, 0)) 
+
+
+    def draw_string(self, pen, str, x, y):
+        pen.width(2)
+        pen.color(self.color) # picks the color we set the object earlier
+
+        # center the text
+        x -= 15 * self.scale * ((len(str)-1) / 2)
+        for character in str:
+            self.draw_character(pen, character, x, y)
+            x += 15 * self.scale
+
+    def draw_character(self, pen, character, x, y):
+        scale = self.scale # might want some characters bigger than others
+
+        if character in 'abcdefghijklmnopqrstuvwxyz':
+            scale *= 0.8 # maing the lower case character 80% the size of the upper ones
+            
+        character = character.upper() # we want any character as an uppercase letter
+        # check if the character is in the dictionary
+        if character in self.characters:
+            pen.penup()
+            xy = self. characters[character][0] # gives us the coordinates we have declared f.e. xy for 1 is (-5,10)
+            pen.goto(x + xy[0] * scale, y + xy[1] * scale)
+            pen.pendown()
+            for i in range(1, len(self.characters[character])):
+                xy = self. characters[character][i] 
+                pen.goto(x + xy[0] * scale, y + xy[1] * scale)
+            pen.penup()                   
+
+character_pen = CharacterPen('red', 3.0)
 
 class Sprite(): # the class for objects like player, enemy etc.
     # the constructor
@@ -343,6 +444,7 @@ class Radar():
     def render(self, pen, sprites):
 
         # Draw radar circle
+        pen.color('white')
         pen.setheading(90)
         pen.goto(self.x + self.width / 2, self.y)
         pen.pendown()
@@ -474,6 +576,10 @@ while True:
     
     # Updating the camera
     camera.update(player.x, player.y)
+
+    # draw text
+    #character_pen.draw_string(pen, '@KARIM', 0, 0)
+    game.render_info(pen, 0, 0)
 
     # Render the radar
     radar.render(pen, sprites)
