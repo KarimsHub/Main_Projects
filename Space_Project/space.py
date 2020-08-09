@@ -197,6 +197,8 @@ class Sprite(): # the class for objects like player, enemy etc.
         self.height = 20
         self.state = 'active'
         self.radar = 200
+        self.max_dx = 4
+        self.max_dy = 4
 
 
     def is_collision(self, other):
@@ -400,6 +402,17 @@ class Enemy(Sprite): # inherets the attributes from the parent class
         Sprite.__init__(self, x, y, shape, color)
         self.max_health = 20
         self.health = self.max_health
+        self.type = random.choice(['hunter', 'mine', 'surveillance'])
+
+        if self.type == 'hunter':
+            self.color = 'red'
+            self.shape = 'square'
+        elif self.type == 'mine':
+            self.color = 'orange'
+            self.shape = 'square'
+        elif self.type == 'surveillance':
+            self.color = 'pink'
+            self.shape = 'square'
 
     def update(self):
         if self.state == 'active':
@@ -417,6 +430,44 @@ class Enemy(Sprite): # inherets the attributes from the parent class
             # Check health
             if self.health <= 0:
                 self.reset()
+            
+            # for different enemy types
+            if self.type == 'hunter': # they should go after the player
+                if self.x < player.x: # the hunter is to left of the player
+                    self.dx += 0.05 # numbers depending of your system speed
+                else:
+                    self.dx -= 0.05
+                
+                if self.y < player.y:
+                    self.dy += 0.05
+                else:
+                    self.dy -= 0.05 
+            elif self.type == 'mine':
+                self.dx = 0
+                self.dy = 0
+            
+            elif self.type == 'surveillance': # they should avoid the player by deault
+                if self.x < player.x:
+                    self.dx -= 0.05 
+                else:
+                    self.dx += 0.05
+                
+                if self.y < player.y:
+                    self.dy -= 0.05
+                else:
+                    self.dy += 0.05
+            
+            # Set max speed
+            if self.dx > self.max_dx:
+                self.dx = self.max_dx
+            elif self.dx < -self.max_dx:
+                self.dx = -self.max_dx
+            
+            if self.dy > self.max_dy:
+                self.dy = self.max_dy
+            elif self.dy < -self.max_dy:
+                self.dy = -self.max_dy
+
     
     def reset(self):
         self.state = 'inactive'
