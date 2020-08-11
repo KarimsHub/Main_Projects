@@ -34,7 +34,8 @@ class Game():
         sprites.append(player)
 
         # add missile
-        sprites.append(missile)
+        for missile in missiles:
+            sprites.append(missile)
 
         # add enemy per level
         for _ in range(self.level):
@@ -308,8 +309,31 @@ class Player(Sprite): # inherets the attributes from the parent class
         self.thrust = 0.0
     
     def fire(self):
-        missile.fire(self.x, self.y, self.heading, self.dx, self.dy) # missile starting on the same position as the player sprites
-    
+        num_of_missiles = 0
+        for missile in missiles:
+            if missile.state == 'ready':
+                num_of_missiles += 1
+        
+        for missile in missiles:
+            # 1 missile ready
+            if num_of_missiles == 1:
+                missile.fire(self.x, self.y, self.heading, self.dx, self.dy) # missile starting on the same position as the player sprites
+                break
+            # 2 missiles ready
+            if num_of_missiles == 2:
+                directions = [-5, 5] # we just want them spreading left and right
+                for missile in missiles:
+                    if missile.state == 'ready':         
+                        missile.fire(self.x, self.y, self.heading + directions.pop(), self.dx, self.dy) # missile starting on the same position as the player sprites
+                    
+            # 3 missiles ready
+            if num_of_missiles == 3:
+                directions = [0, -5, 5] # spreading in the left, right, middle
+                for missile in missiles:
+                    if missile.state == 'ready':
+                        missile.fire(self.x, self.y, self.heading + directions.pop(), self.dx, self.dy) # missile starting on the same position as the player sprites
+                    
+
     def update(self):
         if self.state == 'active':
             self.heading += self.da # the heading is gonna change by the delta of the angle
@@ -532,7 +556,9 @@ player = Player(0,0, 'triangle', 'white') # putting the player in the center
 camera = Camera(player.x, player.y)
 
 # Creating missile object
-missile = Missile(0, 100, 'circle', 'yellow')
+missiles = []
+for _ in range(3):
+    missiles.append(Missile(0, 100, 'circle', 'yellow'))
 
 #enemy = Enemy(0,100, 'square', 'red')
 #enemy.dx = -1
@@ -591,20 +617,22 @@ while True:
                 sprite.health -= 10
                 player.health -= 10
                 player.bounce(sprite)
-
-            if missile.state == 'active' and missile.is_collision(sprite):
-                sprite.health -= 10
-                missile.reset()
+            
+            for missile in missiles:
+                if missile.state == 'active' and missile.is_collision(sprite):
+                    sprite.health -= 10
+                    missile.reset()
         
         if isinstance(sprite, Powerup):
             if player.is_collision(sprite):
                 sprite.x = 100
                 sprite.y = 100
 
-            if missile.state == 'active' and missile.is_collision(sprite):
-                sprite.x = 100
-                sprite.y = -100
-                missile.reset()
+            for missile in missiles:
+                if missile.state == 'active' and missile.is_collision(sprite):
+                    sprite.x = 100
+                    sprite.y = -100
+                    missile.reset()
 
 
     # Render the Sprites
